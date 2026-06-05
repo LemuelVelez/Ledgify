@@ -1,37 +1,26 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
-import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors, radius, spacing } from "@/constants/theme";
 import { useLedger } from "@/providers/LedgerProvider";
-import { User } from "@/types/ledger";
 
 const featureCards = [
   {
     icon: "receipt-outline",
-    title: "Track fee records",
-    description: "Monitor registration, monthly, tutorial, and project fees in one clean workspace.",
+    title: "Organized fee records",
+    description: "Track registration, monthly, tutorial, and project fees in a clean school ledger.",
   },
   {
     icon: "card-outline",
     title: "Cash or e-wallet",
-    description: "Let payers submit payment records through the app using cash or e-wallet.",
+    description: "Record payer transactions through the app using the supported payment methods.",
   },
   {
-    icon: "shield-checkmark-outline",
-    title: "Role-based access",
-    description: "Open the correct tools automatically after signing in with an active account.",
+    icon: "analytics-outline",
+    title: "Clear collection view",
+    description: "Review balances, payment history, and recent collections without manual paper logs.",
   },
 ] satisfies {
   icon: keyof typeof Ionicons.glyphMap;
@@ -39,131 +28,68 @@ const featureCards = [
   description: string;
 }[];
 
+const quickStats = [
+  { value: "2", label: "Payment methods" },
+  { value: "4", label: "Workspaces" },
+  { value: "1", label: "School ledger" },
+];
+
 export default function WelcomeScreen() {
-  const { isAuthenticated, signIn, users } = useLedger();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [secureEntry, setSecureEntry] = useState(true);
-  const [error, setError] = useState("");
+  const { isAuthenticated } = useLedger();
 
   if (isAuthenticated) {
     return <Redirect href="/dashboard" />;
   }
 
-  const activeUsers = users.filter((user) => user.status === "active");
-
-  const submitLogin = () => {
-    const didSignIn = signIn(email, password);
-
-    if (!didSignIn) {
-      setError("Enter an active account email and password.");
-      return;
-    }
-
-    setError("");
-    router.replace("/dashboard");
-  };
-
-  const fillEmail = (user: User) => {
-    setEmail(user.email);
-    setError("");
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.keyboardWrap}>
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.heroCard}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroCard}>
+          <View style={styles.heroTopRow}>
             <View style={styles.logoWrap}>
               <Ionicons name="bookmarks-outline" size={32} color={colors.primary} />
             </View>
+            <View style={styles.badge}>
+              <Ionicons name="shield-checkmark-outline" size={15} color={colors.primary} />
+              <Text style={styles.badgeText}>Secure fee tracker</Text>
+            </View>
+          </View>
+
+          <View style={styles.heroTextWrap}>
             <Text style={styles.eyebrow}>Welcome to Ledgify</Text>
-            <Text style={styles.title}>Fee tracking made simple.</Text>
+            <Text style={styles.title}>A pleasant way to track school fees.</Text>
             <Text style={styles.subtitle}>
-              Track school fee records and let payers submit cash or e-wallet payments from one secure app.
+              Ledgify helps JEWELS CHRISTIAN BAPTIST SCHOOL INC. organize fee records and payer payments through one simple mobile workspace.
             </Text>
-
-            <View style={styles.featureGrid}>
-              {featureCards.map((feature) => (
-                <View key={feature.title} style={styles.featureCard}>
-                  <View style={styles.featureIcon}>
-                    <Ionicons name={feature.icon} size={18} color={colors.primary} />
-                  </View>
-                  <Text style={styles.featureTitle}>{feature.title}</Text>
-                  <Text style={styles.featureDescription}>{feature.description}</Text>
-                </View>
-              ))}
-            </View>
           </View>
 
-          <View style={styles.authCard}>
-            <View style={styles.authHeader}>
-              <Text style={styles.authTitle}>Sign in</Text>
-              <Text style={styles.authSubtitle}>Use an active school account to continue.</Text>
-            </View>
-
-            <View style={styles.fieldWrap}>
-              <Text style={styles.fieldLabel}>Email</Text>
-              <TextInput
-                autoCapitalize="none"
-                keyboardType="email-address"
-                placeholder="name@school.app"
-                placeholderTextColor={colors.muted}
-                style={styles.input}
-                value={email}
-                onChangeText={(value) => {
-                  setEmail(value);
-                  setError("");
-                }}
-              />
-            </View>
-
-            <View style={styles.fieldWrap}>
-              <Text style={styles.fieldLabel}>Password</Text>
-              <View style={styles.passwordField}>
-                <TextInput
-                  placeholder="Enter password"
-                  placeholderTextColor={colors.muted}
-                  secureTextEntry={secureEntry}
-                  style={styles.passwordInput}
-                  value={password}
-                  onChangeText={(value) => {
-                    setPassword(value);
-                    setError("");
-                  }}
-                />
-                <Pressable style={styles.eyeButton} onPress={() => setSecureEntry((current) => !current)}>
-                  <Ionicons name={secureEntry ? "eye-outline" : "eye-off-outline"} size={19} color={colors.muted} />
-                </Pressable>
+          <View style={styles.statsGrid}>
+            {quickStats.map((stat) => (
+              <View key={stat.label} style={styles.statCard}>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
               </View>
-            </View>
-
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-            <Pressable style={styles.primaryButton} onPress={submitLogin}>
-              <Text style={styles.primaryButtonText}>Sign in</Text>
-              <Ionicons name="arrow-forward" size={19} color={colors.white} />
-            </Pressable>
-
-            <View style={styles.accountSection}>
-              <Text style={styles.accountTitle}>Available accounts</Text>
-              <View style={styles.accountGrid}>
-                {activeUsers.map((user) => (
-                  <Pressable key={user.id} style={styles.accountCard} onPress={() => fillEmail(user)}>
-                    <View style={styles.accountIcon}>
-                      <Ionicons name="person-outline" size={17} color={colors.primary} />
-                    </View>
-                    <View style={styles.accountTextWrap}>
-                      <Text style={styles.accountName}>{user.name}</Text>
-                      <Text style={styles.accountEmail}>{user.email}</Text>
-                    </View>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
+            ))}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          <Pressable style={styles.primaryButton} onPress={() => router.push("./auth")}>
+            <Text style={styles.primaryButtonText}>Get started</Text>
+            <Ionicons name="arrow-forward" size={19} color={colors.white} />
+          </Pressable>
+        </View>
+
+        <View style={styles.featureGrid}>
+          {featureCards.map((feature) => (
+            <View key={feature.title} style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Ionicons name={feature.icon} size={20} color={colors.primary} />
+              </View>
+              <Text style={styles.featureTitle}>{feature.title}</Text>
+              <Text style={styles.featureDescription}>{feature.description}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -172,9 +98,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  keyboardWrap: {
-    flex: 1,
   },
   content: {
     flexGrow: 1,
@@ -185,9 +108,9 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   heroCard: {
-    gap: spacing.md,
+    gap: spacing.lg,
     padding: spacing.xl,
-    borderRadius: 32,
+    borderRadius: 34,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.card,
@@ -197,13 +120,39 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 12 },
     elevation: 5,
   },
+  heroTopRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
   logoWrap: {
-    width: 70,
-    height: 70,
+    width: 72,
+    height: 72,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 24,
+    borderRadius: 25,
     backgroundColor: colors.primarySoft,
+  },
+  badge: {
+    minHeight: 38,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingHorizontal: spacing.md,
+    borderRadius: 999,
+    backgroundColor: colors.primarySoft,
+  },
+  badgeText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  heroTextWrap: {
+    gap: spacing.sm,
   },
   eyebrow: {
     color: colors.primary,
@@ -213,132 +162,56 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   title: {
-    maxWidth: 700,
+    maxWidth: 760,
     color: colors.text,
-    fontSize: 42,
+    fontSize: 44,
     fontWeight: "900",
-    letterSpacing: -1.2,
-    lineHeight: 48,
+    letterSpacing: -1.3,
+    lineHeight: 50,
   },
   subtitle: {
-    maxWidth: 680,
+    maxWidth: 740,
     color: colors.muted,
     fontSize: 16,
     fontWeight: "700",
     lineHeight: 24,
   },
-  featureGrid: {
-    width: "100%",
+  statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md,
-    marginTop: spacing.sm,
   },
-  featureCard: {
+  statCard: {
     flexGrow: 1,
     flexShrink: 1,
-    flexBasis: 230,
-    minWidth: 210,
-    gap: spacing.xs,
+    flexBasis: 160,
+    minHeight: 88,
+    justifyContent: "center",
+    gap: 3,
     padding: spacing.md,
     borderRadius: radius.xl,
     backgroundColor: colors.background,
   },
-  featureIcon: {
-    width: 38,
-    height: 38,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 14,
-    backgroundColor: colors.primarySoft,
-  },
-  featureTitle: {
+  statValue: {
     color: colors.text,
-    fontSize: 14,
+    fontSize: 24,
     fontWeight: "900",
   },
-  featureDescription: {
+  statLabel: {
     color: colors.muted,
     fontSize: 12,
-    fontWeight: "700",
-    lineHeight: 17,
-  },
-  authCard: {
-    gap: spacing.md,
-    padding: spacing.xl,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  authHeader: {
-    gap: 5,
-  },
-  authTitle: {
-    color: colors.text,
-    fontSize: 26,
-    fontWeight: "900",
-    letterSpacing: -0.5,
-  },
-  authSubtitle: {
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 18,
-  },
-  fieldWrap: {
-    gap: 8,
-  },
-  fieldLabel: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: "900",
-  },
-  input: {
-    minHeight: 54,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: "700",
-    backgroundColor: colors.background,
-  },
-  passwordField: {
-    minHeight: 54,
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  eyeButton: {
-    width: 50,
-    height: 54,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  errorText: {
-    color: colors.danger,
-    fontSize: 13,
     fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
   },
   primaryButton: {
-    minHeight: 54,
+    minHeight: 56,
+    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: radius.lg,
     backgroundColor: colors.primary,
   },
@@ -347,55 +220,41 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "900",
   },
-  accountSection: {
-    gap: spacing.sm,
-    paddingTop: spacing.sm,
-  },
-  accountTitle: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: "900",
-  },
-  accountGrid: {
+  featureGrid: {
+    width: "100%",
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.sm,
+    gap: spacing.md,
   },
-  accountCard: {
+  featureCard: {
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 260,
-    minHeight: 64,
-    flexDirection: "row",
-    alignItems: "center",
+    minWidth: 230,
     gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radius.lg,
+    padding: spacing.lg,
+    borderRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.background,
+    backgroundColor: colors.card,
   },
-  accountIcon: {
-    width: 36,
-    height: 36,
+  featureIcon: {
+    width: 42,
+    height: 42,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 13,
+    borderRadius: 15,
     backgroundColor: colors.primarySoft,
   },
-  accountTextWrap: {
-    flex: 1,
-    minWidth: 0,
-  },
-  accountName: {
+  featureTitle: {
     color: colors.text,
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "900",
   },
-  accountEmail: {
-    marginTop: 2,
+  featureDescription: {
     color: colors.muted,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "700",
+    lineHeight: 18,
   },
 });

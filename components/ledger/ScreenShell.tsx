@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactNode } from "react";
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ROLE_OPTIONS } from "@/constants/ledger";
 import { colors, radius, spacing } from "@/constants/theme";
@@ -21,7 +22,7 @@ export function ScreenShell({ title, subtitle, currentRole, children }: ScreenSh
 
   const handleSignOut = () => {
     signOut();
-    router.replace("/");
+    router.replace("../auth");
   };
 
   return (

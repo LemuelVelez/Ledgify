@@ -27,7 +27,7 @@ export default function TabLayout() {
   const availableTabs = roleTabs[currentUser.role];
 
   if (!isAuthenticated) {
-    return <Redirect href="/" />;
+    return <Redirect href="../auth" />;
   }
 
   const isTabAvailable = (routeName: string) => availableTabs.includes(routeName as TabRoute);
