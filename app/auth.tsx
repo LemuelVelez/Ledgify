@@ -42,9 +42,16 @@ export default function AuthScreen() {
     router.replace("/dashboard");
   };
 
-  const fillEmail = (user: User) => {
-    setEmail(user.email);
+  const signInWithAccount = (user: User) => {
+    const didSignIn = signIn(user.email, "test-account");
+
+    if (!didSignIn) {
+      setError("This account is not available for sign in.");
+      return;
+    }
+
     setError("");
+    router.replace("/dashboard");
   };
 
   return (
@@ -115,7 +122,7 @@ export default function AuthScreen() {
             <Text style={styles.accountTitle}>Available accounts</Text>
             <View style={styles.accountGrid}>
               {activeUsers.map((user) => (
-                <Pressable key={user.id} style={styles.accountCard} onPress={() => fillEmail(user)}>
+                <Pressable key={user.id} style={styles.accountCard} onPress={() => signInWithAccount(user)}>
                   <View style={styles.accountIcon}>
                     <Ionicons name="person-outline" size={17} color={colors.primary} />
                   </View>
