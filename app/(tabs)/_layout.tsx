@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 
 import { colors, radius, spacing } from "@/constants/theme";
 import { useLedger } from "@/providers/LedgerProvider";
@@ -22,13 +22,11 @@ const roleTabs: Record<Role, TabRoute[]> = {
   payer: ["dashboard", "payments"],
 };
 
-export default function TabLayout() {
-  const { currentUser, isAuthenticated } = useLedger();
-  const availableTabs = roleTabs[currentUser.role];
+const floatingTabInset = spacing.xl + spacing.lg;
 
-  if (!isAuthenticated) {
-    return <Redirect href="../auth" />;
-  }
+export default function TabLayout() {
+  const { currentUser } = useLedger();
+  const availableTabs = roleTabs[currentUser.role];
 
   const isTabAvailable = (routeName: string) => availableTabs.includes(routeName as TabRoute);
 
@@ -48,7 +46,7 @@ export default function TabLayout() {
           marginTop: 0,
         },
         tabBarItemStyle: {
-          height: 46,
+          height: 50,
           alignItems: "center",
           justifyContent: "center",
           marginHorizontal: spacing.xs,
@@ -57,10 +55,10 @@ export default function TabLayout() {
         },
         tabBarStyle: {
           position: "absolute",
-          left: spacing.lg,
-          right: spacing.lg,
+          left: floatingTabInset,
+          right: floatingTabInset,
           bottom: spacing.lg,
-          height: 64,
+          height: 70,
           borderRadius: radius.xl,
           borderWidth: 1,
           borderColor: colors.border,
@@ -70,8 +68,8 @@ export default function TabLayout() {
           shadowRadius: 18,
           shadowOffset: { width: 0, height: 10 },
           elevation: 8,
-          paddingTop: 6,
-          paddingBottom: 6,
+          paddingTop: 8,
+          paddingBottom: 8,
           paddingHorizontal: spacing.sm,
         },
         tabBarIcon: ({ color, focused }) => {
