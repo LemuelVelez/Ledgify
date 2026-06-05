@@ -23,7 +23,10 @@ export function StatCard({ label, value, icon }: StatCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    width: "47.8%",
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 138,
+    minWidth: 124,
     gap: spacing.xs,
     padding: spacing.md,
     borderRadius: radius.xl,

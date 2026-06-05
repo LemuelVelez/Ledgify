@@ -1,14 +1,16 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
 
 import { SEED_FEES, SEED_PAYMENTS, SEED_USERS } from "@/constants/ledger";
-import { Fee, Payment, Role, User } from "@/types/ledger";
+import { Fee, Payment, User } from "@/types/ledger";
 import { createId } from "@/utils/ledger";
 
 type LedgerContextValue = {
   activeInstitutionId: string;
   setActiveInstitutionId: (institutionId: string) => void;
   currentUser: User;
-  setCurrentRole: (role: Role) => void;
+  isAuthenticated: boolean;
+  signIn: (email: string, password: string) => boolean;
+  signOut: () => void;
   users: User[];
   fees: Fee[];
   payments: Payment[];
@@ -33,15 +35,37 @@ type LedgerProviderProps = {
 };
 
 export function LedgerProvider({ children }: LedgerProviderProps) {
-  const [activeInstitutionId, setActiveInstitutionId] = useState("inst-jrmsu");
-  const [currentRole, setCurrentRole] = useState<Role>("superadmin");
+  const [activeInstitutionId, setActiveInstitutionId] = useState("inst-jewels");
+  const [currentUserId, setCurrentUserId] = useState(SEED_USERS[0].id);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [users, setUsers] = useState(SEED_USERS);
   const [fees, setFees] = useState(SEED_FEES);
   const [payments, setPayments] = useState(SEED_PAYMENTS);
 
-  const currentUser = useMemo(() => {
-    return users.find((user) => user.role === currentRole) ?? users[0];
-  }, [currentRole, users]);
+  const currentUser = useMemo<User>(() => {
+    return users.find((user) => user.id === currentUserId) ?? users[0] ?? SEED_USERS[0];
+  }, [currentUserId, users]);
+
+  const signIn = useCallback(
+    (email: string, password: string) => {
+      const normalizedEmail = email.trim().toLowerCase();
+      const hasPassword = password.trim().length > 0;
+      const user = users.find((item) => item.email.toLowerCase() === normalizedEmail && item.status === "active");
+
+      if (!user || !hasPassword) {
+        return false;
+      }
+
+      setCurrentUserId(user.id);
+      setIsAuthenticated(true);
+      return true;
+    },
+    [users],
+  );
+
+  const signOut = useCallback(() => {
+    setIsAuthenticated(false);
+  }, []);
 
   const payerOptions = useMemo(() => {
     return users
@@ -66,7 +90,9 @@ export function LedgerProvider({ children }: LedgerProviderProps) {
       activeInstitutionId,
       setActiveInstitutionId,
       currentUser,
-      setCurrentRole,
+      isAuthenticated,
+      signIn,
+      signOut,
       users,
       fees,
       payments,
@@ -83,7 +109,19 @@ export function LedgerProvider({ children }: LedgerProviderProps) {
       updatePayment: (payment) => setPayments((current) => updateRecord(current, payment)),
       deletePayment: (id) => setPayments((current) => current.filter((payment) => payment.id !== id)),
     };
-  }, [activeInstitutionId, collectorOptions, currentUser, feeOptions, fees, payerOptions, payments, users]);
+  }, [
+    activeInstitutionId,
+    collectorOptions,
+    currentUser,
+    feeOptions,
+    fees,
+    isAuthenticated,
+    payerOptions,
+    payments,
+    signIn,
+    signOut,
+    users,
+  ]);
 
   return <LedgerContext.Provider value={value}>{children}</LedgerContext.Provider>;
 }

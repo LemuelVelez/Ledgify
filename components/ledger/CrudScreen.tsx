@@ -28,12 +28,16 @@ export type FieldConfig<T> = {
 type CrudScreenProps<T extends { id: string }> = {
   addLabel: string;
   emptyText: string;
+  readOnlyText?: string;
   records: T[];
   fields: FieldConfig<T>[];
   makeInitial: () => T;
   onCreate: (record: T) => void;
   onUpdate: (record: T) => void;
   onDelete: (id: string) => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
   renderTitle: (record: T) => string;
   renderSubtitle: (record: T) => string;
   renderMeta: (record: T) => string;
@@ -42,12 +46,16 @@ type CrudScreenProps<T extends { id: string }> = {
 export function CrudScreen<T extends { id: string }>({
   addLabel,
   emptyText,
+  readOnlyText,
   records,
   fields,
   makeInitial,
   onCreate,
   onUpdate,
   onDelete,
+  canCreate = true,
+  canUpdate = true,
+  canDelete = true,
   renderTitle,
   renderSubtitle,
   renderMeta,
@@ -58,12 +66,17 @@ export function CrudScreen<T extends { id: string }>({
   const [error, setError] = useState("");
 
   const title = editingRecord ? "Edit record" : addLabel;
+  const showActions = canUpdate || canDelete;
 
   const requiredMissing = useMemo(() => {
     return fields.some((field) => field.required && !String(form[String(field.key)] ?? "").trim());
   }, [fields, form]);
 
   const openCreate = () => {
+    if (!canCreate) {
+      return;
+    }
+
     const initial = makeInitial();
     setEditingRecord(null);
     setForm(toForm(initial, fields));
@@ -72,6 +85,10 @@ export function CrudScreen<T extends { id: string }>({
   };
 
   const openEdit = (record: T) => {
+    if (!canUpdate) {
+      return;
+    }
+
     setEditingRecord(record);
     setForm(toForm(record, fields));
     setError("");
@@ -114,10 +131,17 @@ export function CrudScreen<T extends { id: string }>({
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.addButton} onPress={openCreate}>
-        <Ionicons name="add" size={20} color={colors.white} />
-        <Text style={styles.addButtonText}>{addLabel}</Text>
-      </Pressable>
+      {canCreate ? (
+        <Pressable style={styles.addButton} onPress={openCreate}>
+          <Ionicons name="add" size={20} color={colors.white} />
+          <Text style={styles.addButtonText}>{addLabel}</Text>
+        </Pressable>
+      ) : readOnlyText ? (
+        <View style={styles.readOnlyCard}>
+          <Ionicons name="eye-outline" size={20} color={colors.primary} />
+          <Text style={styles.readOnlyText}>{readOnlyText}</Text>
+        </View>
+      ) : null}
 
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
         {records.length === 0 ? (
@@ -133,14 +157,20 @@ export function CrudScreen<T extends { id: string }>({
                   <Text style={styles.cardTitle}>{renderTitle(record)}</Text>
                   <Text style={styles.cardSubtitle}>{renderSubtitle(record)}</Text>
                 </View>
-                <View style={styles.actions}>
-                  <Pressable style={styles.iconButton} onPress={() => openEdit(record)}>
-                    <Ionicons name="create-outline" size={18} color={colors.primary} />
-                  </Pressable>
-                  <Pressable style={styles.iconButton} onPress={() => onDelete(record.id)}>
-                    <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                  </Pressable>
-                </View>
+                {showActions ? (
+                  <View style={styles.actions}>
+                    {canUpdate ? (
+                      <Pressable style={styles.iconButton} onPress={() => openEdit(record)}>
+                        <Ionicons name="create-outline" size={18} color={colors.primary} />
+                      </Pressable>
+                    ) : null}
+                    {canDelete ? (
+                      <Pressable style={styles.iconButton} onPress={() => onDelete(record.id)}>
+                        <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : null}
               </View>
               <Text style={styles.cardMeta}>{renderMeta(record)}</Text>
             </View>
@@ -166,18 +196,19 @@ export function CrudScreen<T extends { id: string }>({
 
                 if (field.type === "dropdown") {
                   return (
-                    <DropdownField
-                      key={key}
-                      label={field.label}
-                      value={value}
-                      options={field.options ?? []}
-                      onChange={(nextValue) => updateValue(field, nextValue)}
-                    />
+                    <View key={key} style={styles.formField}>
+                      <DropdownField
+                        label={field.label}
+                        value={value}
+                        options={field.options ?? []}
+                        onChange={(nextValue) => updateValue(field, nextValue)}
+                      />
+                    </View>
                   );
                 }
 
                 return (
-                  <View key={key} style={styles.fieldWrap}>
+                  <View key={key} style={[styles.fieldWrap, styles.formField]}>
                     <Text style={styles.fieldLabel}>{field.label}</Text>
                     <TextInput
                       style={styles.input}
@@ -218,6 +249,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   addButton: {
+    alignSelf: "stretch",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -231,12 +263,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "900",
   },
+  readOnlyCard: {
+    minHeight: 52,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.primarySoft,
+  },
+  readOnlyText: {
+    flex: 1,
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "800",
+    lineHeight: 18,
+  },
   list: {
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "stretch",
     gap: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: 108,
+    paddingBottom: 112,
   },
   card: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 310,
+    minWidth: 240,
     padding: spacing.md,
     borderRadius: radius.xl,
     borderWidth: 1,
@@ -280,6 +339,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   emptyCard: {
+    width: "100%",
     minHeight: 180,
     alignItems: "center",
     justifyContent: "center",
@@ -305,7 +365,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(15, 23, 42, 0.45)",
   },
   modalCard: {
+    width: "100%",
+    maxWidth: 720,
     maxHeight: "88%",
+    alignSelf: "center",
     padding: spacing.lg,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
@@ -330,8 +393,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   form: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "stretch",
     gap: spacing.md,
     paddingVertical: spacing.lg,
+  },
+  formField: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 280,
+    minWidth: 240,
   },
   fieldWrap: {
     gap: 8,
@@ -353,6 +425,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   errorText: {
+    width: "100%",
     color: colors.danger,
     fontSize: 13,
     fontWeight: "800",

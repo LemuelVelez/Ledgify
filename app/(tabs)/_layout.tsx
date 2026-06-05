@@ -1,18 +1,37 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 
 import { colors, radius, spacing } from "@/constants/theme";
+import { useLedger } from "@/providers/LedgerProvider";
+import { Role } from "@/types/ledger";
 
 type TabIconName = keyof typeof Ionicons.glyphMap;
+type TabRoute = "dashboard" | "fees" | "payments" | "members";
 
-const tabs: Record<string, { title: string; icon: TabIconName; focusedIcon: TabIconName }> = {
+const tabs: Record<TabRoute, { title: string; icon: TabIconName; focusedIcon: TabIconName }> = {
   dashboard: { title: "Home", icon: "grid-outline", focusedIcon: "grid" },
   fees: { title: "Fees", icon: "wallet-outline", focusedIcon: "wallet" },
   payments: { title: "Payments", icon: "receipt-outline", focusedIcon: "receipt" },
   members: { title: "Members", icon: "people-outline", focusedIcon: "people" },
 };
 
+const roleTabs: Record<Role, TabRoute[]> = {
+  superadmin: ["dashboard", "fees", "payments", "members"],
+  admin: ["dashboard", "fees", "payments", "members"],
+  bursar: ["dashboard", "payments"],
+  payer: ["dashboard", "payments"],
+};
+
 export default function TabLayout() {
+  const { currentUser, isAuthenticated } = useLedger();
+  const availableTabs = roleTabs[currentUser.role];
+
+  if (!isAuthenticated) {
+    return <Redirect href="/" />;
+  }
+
+  const isTabAvailable = (routeName: string) => availableTabs.includes(routeName as TabRoute);
+
   return (
     <Tabs
       screenOptions={({ route }) => ({
@@ -20,16 +39,28 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarShowLabel: false,
-        tabBarItemStyle: {
-          height: 58,
+        tabBarButton: isTabAvailable(route.name) ? undefined : () => null,
+        tabBarIconStyle: {
+          width: 44,
+          height: 44,
+          alignItems: "center",
           justifyContent: "center",
+          marginTop: 0,
+        },
+        tabBarItemStyle: {
+          height: 46,
+          alignItems: "center",
+          justifyContent: "center",
+          marginHorizontal: spacing.xs,
+          paddingVertical: 0,
+          borderRadius: radius.lg,
         },
         tabBarStyle: {
           position: "absolute",
           left: spacing.lg,
           right: spacing.lg,
           bottom: spacing.lg,
-          height: 66,
+          height: 64,
           borderRadius: radius.xl,
           borderWidth: 1,
           borderColor: colors.border,
@@ -39,19 +70,29 @@ export default function TabLayout() {
           shadowRadius: 18,
           shadowOffset: { width: 0, height: 10 },
           elevation: 8,
-          paddingTop: 8,
-          paddingBottom: 8,
+          paddingTop: 6,
+          paddingBottom: 6,
+          paddingHorizontal: spacing.sm,
         },
-        tabBarIcon: ({ color, focused, size }) => {
-          const item = tabs[route.name] ?? tabs.dashboard;
-          return <Ionicons name={focused ? item.focusedIcon : item.icon} size={size} color={color} />;
+        tabBarIcon: ({ color, focused }) => {
+          const item = tabs[route.name as TabRoute] ?? tabs.dashboard;
+          return <Ionicons name={focused ? item.focusedIcon : item.icon} size={focused ? 23 : 22} color={color} />;
         },
       })}
     >
-      <Tabs.Screen name="dashboard" options={{ title: tabs.dashboard.title, tabBarLabel: () => null }} />
-      <Tabs.Screen name="fees" options={{ title: tabs.fees.title, tabBarLabel: () => null }} />
-      <Tabs.Screen name="payments" options={{ title: tabs.payments.title, tabBarLabel: () => null }} />
-      <Tabs.Screen name="members" options={{ title: tabs.members.title, tabBarLabel: () => null }} />
+      <Tabs.Screen
+        name="dashboard"
+        options={{ title: tabs.dashboard.title, href: isTabAvailable("dashboard") ? "/dashboard" : null }}
+      />
+      <Tabs.Screen name="fees" options={{ title: tabs.fees.title, href: isTabAvailable("fees") ? "/fees" : null }} />
+      <Tabs.Screen
+        name="payments"
+        options={{ title: tabs.payments.title, href: isTabAvailable("payments") ? "/payments" : null }}
+      />
+      <Tabs.Screen
+        name="members"
+        options={{ title: tabs.members.title, href: isTabAvailable("members") ? "/members" : null }}
+      />
     </Tabs>
   );
 }

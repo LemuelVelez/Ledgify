@@ -6,7 +6,7 @@ export type FeeCategory = "registration" | "monthly" | "project";
 
 export type PaymentStatus = "paid" | "partial" | "unpaid" | "void";
 
-export type PaymentMethod = "cash" | "gcash" | "bank_transfer" | "check" | "other";
+export type PaymentMethod = "cash" | "e_wallet";
 
 export type Institution = {
   id: string;

@@ -9,8 +9,11 @@ export const ROLE_OPTIONS: SelectOption[] = [
 ];
 
 export const INSTITUTIONS: Institution[] = [
-  { id: "inst-jrmsu", name: "JRMSU Tampilisan", campus: "Main Institution" },
-  { id: "inst-demo", name: "Demo Institution", campus: "Sandbox" },
+  {
+    id: "inst-jewels",
+    name: "JEWELS CHRISTIAN BAPTIST SCHOOL INC",
+    campus: "7114, Poblacion East, Salug, Zamboanga del Norte",
+  },
 ];
 
 export const INSTITUTION_OPTIONS: SelectOption[] = INSTITUTIONS.map((institution) => ({
@@ -19,19 +22,24 @@ export const INSTITUTION_OPTIONS: SelectOption[] = INSTITUTIONS.map((institution
 }));
 
 export const PROGRAM_OPTIONS: SelectOption[] = [
-  { label: "All Programs", value: "All Programs" },
-  { label: "BS Information Systems", value: "BS Information Systems" },
-  { label: "BS Computer Science", value: "BS Computer Science" },
-  { label: "BS Information Technology", value: "BS Information Technology" },
-  { label: "BS Business Administration", value: "BS Business Administration" },
+  { label: "All Levels", value: "All Levels" },
+  { label: "Nursery", value: "Nursery" },
+  { label: "Kinder 1", value: "Kinder 1" },
+  { label: "Kinder 2", value: "Kinder 2" },
+  { label: "Grade 1", value: "Grade 1" },
+  { label: "Grade 2", value: "Grade 2" },
+  { label: "Grade 3", value: "Grade 3" },
+  { label: "Grade 4", value: "Grade 4" },
+  { label: "Grade 5", value: "Grade 5" },
+  { label: "Grade 6", value: "Grade 6" },
 ];
 
 export const YEAR_LEVEL_OPTIONS: SelectOption[] = [
   { label: "N/A", value: "N/A" },
-  { label: "1st Year", value: "1st Year" },
-  { label: "2nd Year", value: "2nd Year" },
-  { label: "3rd Year", value: "3rd Year" },
-  { label: "4th Year", value: "4th Year" },
+  { label: "3-4 years old", value: "3-4 years old" },
+  { label: "4-5 years old", value: "4-5 years old" },
+  { label: "5-6 years old", value: "5-6 years old" },
+  { label: "Kinder to Grade 6", value: "Kinder to Grade 6" },
 ];
 
 export const FEE_CATEGORY_OPTIONS: SelectOption[] = [
@@ -41,20 +49,22 @@ export const FEE_CATEGORY_OPTIONS: SelectOption[] = [
 ];
 
 export const FEE_NAME_OPTIONS: SelectOption[] = [
-  { label: "Registration Fee", value: "Registration Fee" },
-  { label: "Monthly Fee", value: "Monthly Fee" },
+  { label: "Enrollment Registration Fee", value: "Enrollment Registration Fee" },
+  { label: "Monthly School Fee", value: "Monthly School Fee" },
+  { label: "Summer Tutorial Fee", value: "Summer Tutorial Fee" },
+  { label: "Reading Comprehension & Writing", value: "Reading Comprehension & Writing" },
+  { label: "Numeracy Skills", value: "Numeracy Skills" },
+  { label: "Mathematics", value: "Mathematics" },
   { label: "Project Fee", value: "Project Fee" },
-  { label: "Laboratory Fee", value: "Laboratory Fee" },
-  { label: "Organization Fee", value: "Organization Fee" },
-  { label: "Capstone Project Fund", value: "Capstone Project Fund" },
 ];
 
 export const PROJECT_OPTIONS: SelectOption[] = [
-  { label: "General Ledger", value: "General Ledger" },
-  { label: "Capstone Project", value: "Capstone Project" },
-  { label: "Research Project", value: "Research Project" },
-  { label: "Community Extension", value: "Community Extension" },
-  { label: "Seminar Fund", value: "Seminar Fund" },
+  { label: "Academic Year 2025-2026 Enrollment", value: "Academic Year 2025-2026 Enrollment" },
+  { label: "Summer Tutorial 2025", value: "Summer Tutorial 2025" },
+  { label: "Reading Comprehension & Writing", value: "Reading Comprehension & Writing" },
+  { label: "Numeracy Skills", value: "Numeracy Skills" },
+  { label: "Mathematics", value: "Mathematics" },
+  { label: "General School Ledger", value: "General School Ledger" },
 ];
 
 export const DAY_OPTIONS: SelectOption[] = Array.from({ length: 28 }, (_, index) => {
@@ -91,92 +101,93 @@ export const PAYMENT_STATUS_OPTIONS: SelectOption[] = [
 
 export const PAYMENT_METHOD_OPTIONS: SelectOption[] = [
   { label: "Cash", value: "cash" },
-  { label: "GCash", value: "gcash" },
-  { label: "Bank Transfer", value: "bank_transfer" },
-  { label: "Check", value: "check" },
-  { label: "Other", value: "other" },
+  { label: "E-Wallet", value: "e_wallet" },
 ];
+
+export const TUTORIAL_COURSES = ["Reading Comprehension & Writing", "Numeracy Skills", "Mathematics"];
+
+export const ENROLLMENT_AGE_REQUIREMENTS = ["Nursery: 3-4 years old", "Kinder 1: 4-5 years old", "Kinder 2: 5-6 years old"];
 
 export const SEED_USERS: User[] = [
   {
     id: "user-superadmin",
-    name: "System Superadmin",
-    email: "superadmin@ledgify.app",
+    name: "JCBSI Superadmin",
+    email: "superadmin@jcbsi.ledgify.app",
     role: "superadmin",
-    program: "All Programs",
+    program: "All Levels",
     yearLevel: "N/A",
     status: "active",
   },
   {
     id: "user-admin",
-    name: "Institution Admin",
-    email: "admin@ledgify.app",
+    name: "School Admin",
+    email: "admin@jcbsi.ledgify.app",
     role: "admin",
-    program: "All Programs",
+    program: "All Levels",
     yearLevel: "N/A",
     status: "active",
   },
   {
     id: "user-bursar",
-    name: "Campus Bursar",
-    email: "bursar@ledgify.app",
+    name: "School Bursar",
+    email: "bursar@jcbsi.ledgify.app",
     role: "bursar",
-    program: "All Programs",
+    program: "All Levels",
     yearLevel: "N/A",
     status: "active",
   },
   {
     id: "user-payer-1",
-    name: "Lemuel Velez",
-    email: "lemuel@student.ledgify.app",
+    name: "Kinder 1 Payer",
+    email: "kinder1.payer@jcbsi.ledgify.app",
     role: "payer",
-    program: "BS Information Systems",
-    yearLevel: "3rd Year",
+    program: "Kinder 1",
+    yearLevel: "4-5 years old",
     status: "active",
   },
   {
     id: "user-payer-2",
-    name: "Reynel Mira",
-    email: "reynel@student.ledgify.app",
+    name: "Grade 3 Payer",
+    email: "grade3.payer@jcbsi.ledgify.app",
     role: "payer",
-    program: "BS Information Systems",
-    yearLevel: "3rd Year",
+    program: "Grade 3",
+    yearLevel: "Kinder to Grade 6",
     status: "active",
   },
 ];
 
 export const SEED_FEES: Fee[] = [
   {
-    id: "fee-registration",
-    institutionId: "inst-jrmsu",
+    id: "fee-enrollment-registration",
+    institutionId: "inst-jewels",
     category: "registration",
-    name: "Registration Fee",
-    program: "All Programs",
-    projectName: "General Ledger",
+    name: "Enrollment Registration Fee",
+    program: "All Levels",
+    projectName: "Academic Year 2025-2026 Enrollment",
     amount: 500,
-    dueDay: "1",
+    dueDay: "28",
     status: "active",
   },
   {
-    id: "fee-monthly",
-    institutionId: "inst-jrmsu",
+    id: "fee-monthly-school",
+    institutionId: "inst-jewels",
     category: "monthly",
-    name: "Monthly Fee",
-    program: "All Programs",
-    projectName: "General Ledger",
-    amount: 250,
+    name: "Monthly School Fee",
+    program: "All Levels",
+    projectName: "General School Ledger",
+    amount: 750,
     dueDay: "5",
     status: "active",
   },
   {
-    id: "fee-project",
-    institutionId: "inst-jrmsu",
+    id: "fee-summer-tutorial",
+    institutionId: "inst-jewels",
     category: "project",
-    name: "Capstone Project Fund",
-    program: "BS Information Systems",
-    projectName: "Capstone Project",
-    amount: 1500,
-    dueDay: "15",
+    name: "Summer Tutorial Fee",
+    program: "Kinder to Grade 6",
+    projectName: "Summer Tutorial 2025",
+    amount: 1200,
+    dueDay: "28",
     status: "active",
   },
 ];
@@ -185,34 +196,34 @@ export const SEED_PAYMENTS: Payment[] = [
   {
     id: "pay-1",
     payerId: "user-payer-1",
-    feeId: "fee-registration",
-    month: "June",
+    feeId: "fee-enrollment-registration",
+    month: "April",
     amount: 500,
     method: "cash",
     status: "paid",
     collectedById: "user-bursar",
-    referenceNo: "LGF-0001",
+    referenceNo: "JCBSI-0001",
   },
   {
     id: "pay-2",
     payerId: "user-payer-1",
-    feeId: "fee-monthly",
-    month: "June",
-    amount: 125,
-    method: "gcash",
+    feeId: "fee-monthly-school",
+    month: "May",
+    amount: 375,
+    method: "e_wallet",
     status: "partial",
     collectedById: "user-bursar",
-    referenceNo: "LGF-0002",
+    referenceNo: "JCBSI-0002",
   },
   {
     id: "pay-3",
     payerId: "user-payer-2",
-    feeId: "fee-project",
-    month: "June",
-    amount: 1500,
-    method: "bank_transfer",
+    feeId: "fee-summer-tutorial",
+    month: "April",
+    amount: 1200,
+    method: "e_wallet",
     status: "paid",
     collectedById: "user-bursar",
-    referenceNo: "LGF-0003",
+    referenceNo: "JCBSI-0003",
   },
 ];
