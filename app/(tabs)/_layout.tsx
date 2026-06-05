@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Tabs } from "expo-router";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { colors, radius, spacing } from "@/constants/theme";
 import { useLedger } from "@/providers/LedgerProvider";
@@ -7,6 +9,10 @@ import { Role } from "@/types/ledger";
 
 type TabIconName = keyof typeof Ionicons.glyphMap;
 type TabRoute = "dashboard" | "fees" | "payments" | "members";
+
+type FloatingTabBarProps = BottomTabBarProps & {
+  availableTabs: TabRoute[];
+};
 
 const tabs: Record<TabRoute, { title: string; icon: TabIconName; focusedIcon: TabIconName }> = {
   dashboard: { title: "Home", icon: "grid-outline", focusedIcon: "grid" },
@@ -22,7 +28,53 @@ const roleTabs: Record<Role, TabRoute[]> = {
   payer: ["dashboard", "payments"],
 };
 
-const floatingTabInset = spacing.xl + spacing.lg;
+function FloatingTabBar({ state, navigation, availableTabs }: FloatingTabBarProps) {
+  const visibleRoutes = state.routes.filter((route) => availableTabs.includes(route.name as TabRoute));
+
+  return (
+    <View pointerEvents="box-none" style={styles.floatingTabWrap}>
+      <View style={styles.floatingTabBar}>
+        {visibleRoutes.map((route) => {
+          const item = tabs[route.name as TabRoute] ?? tabs.dashboard;
+          const focused = state.routes[state.index]?.key === route.key;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!focused && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params);
+            }
+          };
+
+          return (
+            <Pressable
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={focused ? { selected: true } : {}}
+              accessibilityLabel={item.title}
+              style={({ pressed }) => [
+                styles.tabButton,
+                focused && styles.activeTabButton,
+                pressed && styles.pressedTabButton,
+              ]}
+              onPress={onPress}
+            >
+              <Ionicons
+                name={focused ? item.focusedIcon : item.icon}
+                size={focused ? 23 : 22}
+                color={focused ? colors.primary : colors.muted}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
 
 export default function TabLayout() {
   const { currentUser } = useLedger();
@@ -31,53 +83,7 @@ export default function TabLayout() {
   const isTabAvailable = (routeName: string) => availableTabs.includes(routeName as TabRoute);
 
   return (
-    <Tabs
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.muted,
-        tabBarShowLabel: false,
-        tabBarButton: isTabAvailable(route.name) ? undefined : () => null,
-        tabBarIconStyle: {
-          width: 44,
-          height: 44,
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: 0,
-        },
-        tabBarItemStyle: {
-          height: 50,
-          alignItems: "center",
-          justifyContent: "center",
-          marginHorizontal: spacing.xs,
-          paddingVertical: 0,
-          borderRadius: radius.lg,
-        },
-        tabBarStyle: {
-          position: "absolute",
-          left: floatingTabInset,
-          right: floatingTabInset,
-          bottom: spacing.lg,
-          height: 70,
-          borderRadius: radius.xl,
-          borderWidth: 1,
-          borderColor: colors.border,
-          backgroundColor: colors.card,
-          shadowColor: colors.shadow,
-          shadowOpacity: 0.12,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 10 },
-          elevation: 8,
-          paddingTop: 8,
-          paddingBottom: 8,
-          paddingHorizontal: spacing.sm,
-        },
-        tabBarIcon: ({ color, focused }) => {
-          const item = tabs[route.name as TabRoute] ?? tabs.dashboard;
-          return <Ionicons name={focused ? item.focusedIcon : item.icon} size={focused ? 23 : 22} color={color} />;
-        },
-      })}
-    >
+    <Tabs tabBar={(props) => <FloatingTabBar {...props} availableTabs={availableTabs} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen
         name="dashboard"
         options={{ title: tabs.dashboard.title, href: isTabAvailable("dashboard") ? "/dashboard" : null }}
@@ -94,3 +100,48 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  floatingTabWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: spacing.lg,
+    alignItems: "center",
+    paddingHorizontal: spacing.xl + spacing.sm,
+  },
+  floatingTabBar: {
+    width: "82%",
+    maxWidth: 430,
+    minHeight: 68,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 8,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 8,
+  },
+  tabButton: {
+    flex: 1,
+    maxWidth: 64,
+    minHeight: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.lg,
+  },
+  activeTabButton: {
+    backgroundColor: colors.primarySoft,
+  },
+  pressedTabButton: {
+    opacity: 0.75,
+  },
+});
